@@ -54,7 +54,7 @@ while True:
         print "%s | %s" % (ttl, curr_addr)
       
       success = True
-      tries -= 1
+      break
     except socket.error:
       tries -= 1
       continue
