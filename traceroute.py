@@ -23,7 +23,6 @@ send_address = (destination_address, traceroute_port)
 receive_address = ("0.0.0.0", traceroute_port)
 
 receive_socket.bind(receive_address)
-ttl = 1
 
 def attempt_trace(ttl):
   curr_name = None  
@@ -40,6 +39,7 @@ def attempt_trace(ttl):
 
   return curr_name, curr_hostname
 
+ttl = 1
 while True:
   send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
   tries = 3
