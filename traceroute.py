@@ -25,17 +25,12 @@ receive_address = ("0.0.0.0", traceroute_port)
 receive_socket.bind(receive_address)
 ttl = 1
 
-while True:
-  curr_name = None
-  send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
-
+def attempt_trace(ttl):
+  curr_name = None  
   send_socket.sendto("", send_address)
-  try:
-    _, curr_addr = receive_socket.recvfrom(1024)
-    curr_name = curr_addr[0]
-  except socket.error:
-      print "*"
-      continue
+
+  _, curr_addr = receive_socket.recvfrom(1024)
+  curr_name = curr_addr[0]
 
   curr_hostname = None
   try:
@@ -43,12 +38,31 @@ while True:
   except socket.herror:
     pass
 
-  if curr_hostname is not None:
-    print "%s | %s (%s)" % (ttl, curr_hostname, curr_name)
-  else:
-    print "%s | %s" % (ttl, curr_name)
+  return curr_name, curr_hostname
 
-  if curr_name == destination_address:
+while True:
+  send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
+  tries = 3
+  success = False
+  while tries > 0:
+    try:
+      curr_addr, curr_hostname = attempt_trace(ttl)
+
+      if curr_hostname is not None:
+        print "%s | %s (%s)" % (ttl, curr_hostname, curr_addr)
+      else:
+        print "%s | %s" % (ttl, curr_addr)
+      
+      success = True
+      tries -= 1
+    except socket.error:
+      tries -= 1
+      continue
+  
+  if not success:
+      print "*"
+
+  if curr_addr == destination_address:
     break
 
   ttl += 1
